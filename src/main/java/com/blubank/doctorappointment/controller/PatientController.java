@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/doctor")
 @RestController
-public class DoctorController {
+public class PatientController {
 
-    @Operation(summary = "", description = "")
+    @Operation(summary = "", description = "AssetInfoMapper")
     @GetMapping()
     public String updateData() {
         return"Ok";

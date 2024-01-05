@@ -4,6 +4,7 @@ import com.blubank.doctorappointment.dto.ReserveAppointmentDto;
 import com.blubank.doctorappointment.dto.WorkingDayDto;
 import com.blubank.doctorappointment.service.AppointmentService;
 import com.blubank.doctorappointment.service.AppointmentServiceImpl;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,54 +19,77 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SpringBootTest
 class DoctorAppointmentApplicationTests {
 
-	@Autowired
-	private AppointmentService service;
+    @Autowired
+    private AppointmentService service;
 
-	@Test
-	@Order(1)
-	void should_add_workday_properly() {
-		LocalDateTime startTime = LocalDateTime.of(2024, 1, 10, 7, 0);
-		LocalDateTime endTime = LocalDateTime.of(2024, 1, 10, 23, 0);
-		WorkingDayDto workingDayDto = WorkingDayDto.builder()
-				.startTime(startTime)
-				.endTime(endTime)
-				.build();
-		service.addWorkingDay(workingDayDto);
-		assertEquals(32, service.getAllAppointments().size());
-	}
-	@Test
-	@Order(2)
-	void should_add_workday_with_end_time_before_start_time_with_error() {
-		LocalDateTime startTime = LocalDateTime.of(2024, 1, 11, 7, 0);
-		LocalDateTime endTime = LocalDateTime.of(2024, 1, 10, 23, 0);
-		WorkingDayDto workingDayDto = WorkingDayDto.builder()
-				.startTime(startTime)
-				.endTime(endTime)
-				.build();
-		assertThrows(RuntimeException.class, () -> service.addWorkingDay(workingDayDto));
-	}
-	@Test
-	@Order(3)
-	void should_delete_an_appointment() {
-		service.deleteAppointment(1);
-		assertEquals(31, service.getAllAppointments().size());
-	}
+    @Test
+    @Order(1)
+    void should_add_workday_properly() {
+        LocalDateTime startTime = LocalDateTime.of(2024, 1, 10, 7, 0);
+        LocalDateTime endTime = LocalDateTime.of(2024, 1, 10, 23, 0);
+        WorkingDayDto workingDayDto = WorkingDayDto.builder()
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+        service.addWorkingDay(workingDayDto);
+        assertEquals(32, service.getAllAppointments().size());
+    }
 
-	@Test
-	@Order(4)
-	void should_get_appointments_in_date() {
-		assertEquals(31, service.getAppointmentsInDate(LocalDate.of(2024, 1, 10)).size());
-	}
+    @Test
+    @Order(2)
+    void should_add_workday_with_end_time_before_start_time_with_error() {
+        LocalDateTime startTime = LocalDateTime.of(2024, 1, 11, 7, 0);
+        LocalDateTime endTime = LocalDateTime.of(2024, 1, 10, 23, 0);
+        WorkingDayDto workingDayDto = WorkingDayDto.builder()
+                .startTime(startTime)
+                .endTime(endTime)
+                .build();
+        assertThrows(RuntimeException.class, () -> service.addWorkingDay(workingDayDto));
+    }
 
-	@Test
-	@Order(5)
-	void should_patient_reserve_an_appointment() {
-		ReserveAppointmentDto reserveAppointmentDto = ReserveAppointmentDto.builder()
-				.name("Kiarash")
-				.phone("09120089249")
-				.appointmentId(2L)
-				.build();
-		service.reserveAnAppointment(reserveAppointmentDto);
-		assertEquals(1, service.getReservedAppointmentsByPhone("09120089249").size());
-	}
+    @Test
+    @Order(3)
+    void should_delete_an_appointment() {
+        service.deleteAppointment(1);
+        assertEquals(31, service.getAllAppointments().size());
+    }
+
+    @Test
+    @Order(4)
+    void should_get_appointments_in_date() {
+        assertEquals(31, service.getAppointmentsInDate(LocalDate.of(2024, 1, 10)).size());
+    }
+
+    @Test
+    @Order(5)
+    void should_patient_reserve_an_appointment() {
+        ReserveAppointmentDto reserveAppointmentDto = ReserveAppointmentDto.builder()
+                .name("Kiarash")
+                .phone("09120089249")
+                .appointmentId(2L)
+                .build();
+        service.reserveAnAppointment(reserveAppointmentDto);
+        assertEquals(1, service.getReservedAppointmentsByPhone("09120089249").size());
+    }
+
+    @Test
+    @Order(6)
+    @SneakyThrows
+    void should_simultaneous_delete_and_reserve_same_appointment_work_properly() {
+        Thread thread1 = new Thread(() -> {
+            ReserveAppointmentDto reserveAppointmentDto = ReserveAppointmentDto.builder()
+                    .name("Kiarash")
+                    .phone("09120089249")
+                    .appointmentId(3L)
+                    .build();
+            service.reserveAnAppointment(reserveAppointmentDto);
+        });
+
+        Thread thread2 = new Thread(() -> service.deleteAppointment(3));
+
+        thread1.start();
+        thread2.start();
+        thread1.join();
+        thread2.join();
+    }
 }

@@ -2,17 +2,17 @@ package com.blubank.doctorappointment;
 
 import com.blubank.doctorappointment.dto.WorkingDayDto;
 import com.blubank.doctorappointment.service.AppointmentService;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import lombok.RequiredArgsConstructor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 class DoctorAppointmentApplicationTests {
 
@@ -45,6 +45,13 @@ class DoctorAppointmentApplicationTests {
 	@Test
 	@Order(3)
 	void should_delete_an_appointment_properly() {
+		service.deleteAppointment(1);
+		assertEquals(31, service.getAllAppointments().size());
+	}
 
+	@Test
+	@Order(4)
+	void should_get_appointments_in_date_properly() {
+		assertEquals(31, service.getAppointmentsInDate(LocalDate.of(2024, 1, 10)).size());
 	}
 }

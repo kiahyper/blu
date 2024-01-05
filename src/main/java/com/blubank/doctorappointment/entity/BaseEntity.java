@@ -31,31 +31,5 @@ public abstract class BaseEntity {
             strategy = GenerationType.IDENTITY
     )
     private Long id;
-    @CreatedDate
-    @Column(
-            name = "CREATED_ON",
-            nullable = false,
-            updatable = false
-    )
-    @DateTimeFormat(
-            pattern = "yyyy-MM-dd HH:mm:ss"
-    )
-    private LocalDateTime createdOn;
-    @LastModifiedDate
-    @Column(
-            name = "MODIFIED_ON",
-            nullable = false
-    )
-    @DateTimeFormat(
-            pattern = "yyyy-MM-dd HH:mm:ss"
-    )
-    private LocalDateTime modifiedOn;
-    @Version
-    @Column(
-            name = "OPT_LOCK",
-            nullable = false,
-            columnDefinition = "integer DEFAULT 0"
-    )
-    private Long version;
 
 }

@@ -10,6 +10,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @DynamicUpdate
@@ -23,19 +24,17 @@ import java.util.Date;
 public class AppointmentEntity extends BaseEntity{
 
     @Column(name = "start_time_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date startTime;
+    private LocalDateTime startTime;
 
     @Column(name = "end_time_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date endTime;
+    private LocalDateTime endTime;
 
     @Column(name = "is_reserved")
     private boolean isReserved;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient", nullable = false)
+    @JoinColumn(name = "patient")
     private PatientEntity patient;
 }

@@ -63,11 +63,13 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public void reserveAnAppointment(ReserveAppointmentDto dto){
+    public synchronized void reserveAnAppointment(ReserveAppointmentDto dto){
         Optional<AppointmentEntity> opt = appointmentRepository.findById(dto.getAppointmentId());
         if(opt.isEmpty())
             throw new NotFoundException("Appointment not found");
         AppointmentEntity appointment = opt.get();
+        if(appointment.isReserved())
+            throw new RuntimeException("Appointment is reserved already");
         appointment.setPatientName(dto.getName());
         appointment.setPatientPhone(dto.getPhone());
         appointment.setReserved(true);

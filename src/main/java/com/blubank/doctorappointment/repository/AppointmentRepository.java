@@ -12,4 +12,8 @@ public interface AppointmentRepository extends JpaRepository<AppointmentEntity, 
     List<AppointmentEntity> findAllByStartTimeBetween(
             LocalDateTime start,
             LocalDateTime end);
+
+    List<AppointmentEntity> findByIsReserved(boolean isReserved);
+
+    List<AppointmentEntity> findByPatientPhone(String phone);
 }

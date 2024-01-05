@@ -32,9 +32,11 @@ public class AppointmentEntity extends BaseEntity{
     private LocalDateTime endTime;
 
     @Column(name = "is_reserved")
-    private boolean isReserved;
+    private boolean isReserved = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient")
-    private PatientEntity patient;
+    @Column(name = "patient_name")
+    private String patientName;
+
+    @Column(name = "patient_phone")
+    private String patientPhone;
 }

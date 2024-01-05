@@ -6,15 +6,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import javax.validation.constraints.NotNull;
+
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class PatientEntity {
-    private Long id;
-
+public class ReserveAppointmentDto {
+    @NotNull
     private String name;
 
+    @NotNull
     private String phone;
+
+    @NotNull
+    private Long appointmentId;
 }

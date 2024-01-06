@@ -49,6 +49,8 @@ public class AppointmentServiceImpl implements AppointmentService{
 
     @Override
     public List<AppointmentDto> getAppointmentsInDate(LocalDate date){
+        if(date == null)
+            return getAllAppointments();
         LocalDateTime queryStartDate = LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 0, 0);
         LocalDateTime queryEndDate = LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 23, 59);
         List<AppointmentEntity> result = appointmentRepository.findAllByStartTimeBetween(queryStartDate, queryEndDate);

@@ -8,6 +8,7 @@ import com.blubank.doctorappointment.mapper.AppointmentMapper;
 import com.blubank.doctorappointment.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.webjars.NotFoundException;
 
 import java.time.LocalDate;
@@ -60,8 +61,11 @@ public class AppointmentServiceImpl implements AppointmentService{
     @Override
     public void deleteAppointment(long id) {
         synchronized (this) {
-            if (appointmentRepository.findById(id).isEmpty())
+            Optional<AppointmentEntity> opt = appointmentRepository.findById(id);
+            if (opt.isEmpty())
                 throw new NotFoundException("Appointment with this id not found");
+            if(opt.get().isReserved())
+                throw new NotAcceptableStatusException("Reserved appointment cannot be deleted");
             appointmentRepository.deleteById(id);
         }
     }
@@ -74,7 +78,7 @@ public class AppointmentServiceImpl implements AppointmentService{
                 throw new NotFoundException("Appointment not found");
             AppointmentEntity appointment = opt.get();
             if (appointment.isReserved())
-                throw new RuntimeException("Appointment is reserved already");
+                throw new NotAcceptableStatusException("Appointment is reserved already");
             appointment.setPatientName(dto.getName());
             appointment.setPatientPhone(dto.getPhone());
             appointment.setReserved(true);

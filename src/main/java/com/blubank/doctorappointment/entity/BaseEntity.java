@@ -26,4 +26,8 @@ public abstract class BaseEntity {
     )
     private Long id;
 
+
+    @Version
+    private int version;
+
 }

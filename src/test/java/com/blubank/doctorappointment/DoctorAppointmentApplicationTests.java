@@ -72,24 +72,25 @@ class DoctorAppointmentApplicationTests {
         assertEquals(1, service.getReservedAppointmentsByPhone("09120089249").size());
     }
 
+    @SneakyThrows
     @Test
     @Order(6)
-    @SneakyThrows
     void should_simultaneous_delete_and_reserve_same_appointment_work_properly() {
-        Thread thread1 = new Thread(() -> {
-            ReserveAppointmentDto reserveAppointmentDto = ReserveAppointmentDto.builder()
-                    .name("Kiarash")
-                    .phone("09120089249")
-                    .appointmentId(3L)
-                    .build();
-            service.reserveAnAppointment(reserveAppointmentDto);
-        });
 
-        Thread thread2 = new Thread(() -> service.deleteAppointment(3));
 
-        thread1.start();
-        thread2.start();
-        thread1.join();
-        thread2.join();
+            Thread th1 = new Thread(() -> {
+                ReserveAppointmentDto reserveAppointmentDto = ReserveAppointmentDto.builder()
+                        .name("Kiarash")
+                        .phone("09120089249")
+                        .appointmentId(3L)
+                        .build();
+                service.reserveAnAppointment(reserveAppointmentDto);
+            });
+            Thread th2 = new Thread(() -> service.deleteAppointment(3));
+            th1.start();
+            th2.start();
+            th1.join();
+            th2.join();
+
     }
 }

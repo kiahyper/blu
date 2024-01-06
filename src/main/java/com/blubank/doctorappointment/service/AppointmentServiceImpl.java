@@ -8,6 +8,7 @@ import com.blubank.doctorappointment.mapper.AppointmentMapper;
 import com.blubank.doctorappointment.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.webjars.NotFoundException;
 
@@ -19,7 +20,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class AppointmentServiceImpl implements AppointmentService{
+public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
 
@@ -49,8 +50,8 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
-    public List<AppointmentDto> getAppointmentsInDate(LocalDate date){
-        if(date == null)
+    public List<AppointmentDto> getAppointmentsInDate(LocalDate date) {
+        if (date == null)
             return getAllAppointments();
         LocalDateTime queryStartDate = LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 0, 0);
         LocalDateTime queryEndDate = LocalDateTime.of(date.getYear(), date.getMonth(), date.getDayOfMonth(), 23, 59);
@@ -59,40 +60,39 @@ public class AppointmentServiceImpl implements AppointmentService{
     }
 
     @Override
+    @Transactional
     public void deleteAppointment(long id) {
-        synchronized (this) {
-            Optional<AppointmentEntity> opt = appointmentRepository.findById(id);
-            if (opt.isEmpty())
-                throw new NotFoundException("Appointment with this id not found");
-            if(opt.get().isReserved())
-                throw new NotAcceptableStatusException("Reserved appointment cannot be deleted");
-            appointmentRepository.deleteById(id);
-        }
+
+        Optional<AppointmentEntity> opt = appointmentRepository.findById(id);
+        if (opt.isEmpty())
+            throw new NotFoundException("Appointment with this id not found");
+        if (opt.get().isReserved())
+            throw new NotAcceptableStatusException("Reserved appointment cannot be deleted");
+        appointmentRepository.deleteById(id);
     }
 
     @Override
-    public void reserveAnAppointment(ReserveAppointmentDto dto){
-        synchronized (this) {
-            Optional<AppointmentEntity> opt = appointmentRepository.findById(dto.getAppointmentId());
-            if (opt.isEmpty())
-                throw new NotFoundException("Appointment not found");
-            AppointmentEntity appointment = opt.get();
-            if (appointment.isReserved())
-                throw new NotAcceptableStatusException("Appointment is reserved already");
-            appointment.setPatientName(dto.getName());
-            appointment.setPatientPhone(dto.getPhone());
-            appointment.setReserved(true);
-            appointmentRepository.save(appointment);
-        }
+    @Transactional
+    public void reserveAnAppointment(ReserveAppointmentDto dto) {
+        Optional<AppointmentEntity> opt = appointmentRepository.findById(dto.getAppointmentId());
+        if (opt.isEmpty())
+            throw new NotFoundException("Appointment not found");
+        AppointmentEntity appointment = opt.get();
+        if (appointment.isReserved())
+            throw new NotAcceptableStatusException("Appointment is reserved already");
+        appointment.setPatientName(dto.getName());
+        appointment.setPatientPhone(dto.getPhone());
+        appointment.setReserved(true);
+        appointmentRepository.save(appointment);
     }
 
     @Override
-    public List<AppointmentDto> getByReserved(boolean isReserved){
+    public List<AppointmentDto> getByReserved(boolean isReserved) {
         return appointmentMapper.toDtoList(appointmentRepository.findByIsReserved(isReserved));
     }
 
     @Override
-    public List<AppointmentDto> getReservedAppointmentsByPhone(String phone){
+    public List<AppointmentDto> getReservedAppointmentsByPhone(String phone) {
         return appointmentMapper.toDtoList(appointmentRepository.findByPatientPhone(phone));
     }
 }
